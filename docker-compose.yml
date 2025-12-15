@@ -45,6 +45,17 @@ services:
       timeout: 5s
       retries: 10
 
+  producer:
+    build: .
+    container_name: producer
+    env_file:
+      - .env
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    command: python -m app_project.producer.producer
 
 volumes:
   pg_data:

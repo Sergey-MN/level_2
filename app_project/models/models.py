@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Optional
 
-from sqlalchemy import TIMESTAMP, text, JSON, TEXT, String, Enum, func
+from sqlalchemy import TIMESTAMP, JSON, TEXT, String, Enum, func
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app_project.database import Base
