@@ -57,5 +57,17 @@ services:
         condition: service_healthy
     command: python -m app_project.producer.producer
 
+  consumer:
+    build: .
+    container_name: consumer
+    env_file:
+      - .env
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    command: python -m app_project.consumer.consumer
+
 volumes:
   pg_data:

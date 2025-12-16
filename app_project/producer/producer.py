@@ -3,11 +3,10 @@ import pika
 import json
 import logging
 
-from sqlalchemy import select, update
-
-from app_project.models.models import Tasks, Status
+from app_project.models.models import Status
 from app_project.database import session_context
-from app_project.producer.producer_config import mq_settings
+from app_project.rabbit_config import mq_settings
+from app_project.producer.producer_repository import ProducerRepository
 
 logger = logging.getLogger(__name__)
 
@@ -77,23 +76,6 @@ class RabbitMQProducer:
             self.connection.close()
 
 
-class ProducerRepository:
-    async def get_new_tasks(self, session) -> list:
-        stmt = select(Tasks).where(Tasks.status == Status.NEW)
-        result = await session.execute(stmt)
-        return result.scalars().all()
-
-    async def update_status_to_pending(self, session, task_ids: list):
-        update_stmt = (
-            update(Tasks)
-            .where(Tasks.id.in_(task_ids))
-            .values(status=Status.PENDING)
-        )
-
-        await session.execute(update_stmt)
-        await session.commit()
-
-
 async def producer_worker():
     producer = RabbitMQProducer()
     producer.connect()
@@ -108,6 +90,9 @@ async def producer_worker():
                     if tasks:
                         task_ids = []
                         for task in tasks:
+                            if task.status == Status.CANCELLED:
+                                continue
+
                             message = {
                                 "id": task.id,
                                 "title": task.title,
