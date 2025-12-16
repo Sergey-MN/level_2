@@ -14,7 +14,7 @@ class Status(str, PyEnum):
     IN_PROGRESS = "in_progress"
     COMPLETED = "completed"
     FAILED = "failed"
-    CANCELLED = "CANCELLED"
+    CANCELLED = "cancelled"
 
 
 class Priority(str, PyEnum):
@@ -28,7 +28,7 @@ class Tasks(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     title: Mapped[str] = mapped_column(String(50), nullable=False)
-    description: Mapped[str] = mapped_column(TEXT, nullable=False)
+    description: Mapped[str] = mapped_column(TEXT, nullable=False, unique=True)
     priority: Mapped[Priority] = mapped_column(Enum(Priority), default=Priority.LOW)
     status: Mapped[Status] = mapped_column(Enum(Status), default=Status.PENDING)
     created_at: Mapped[datetime] = mapped_column(server_default=func.timezone('utc', func.now()), nullable=False)
